@@ -25,7 +25,6 @@ public class AddConstraint extends ExtendM3Transaction {
   private String ZGKY
   private Integer zblc
   private Integer ztps
-  private Integer ztp1
 
   public AddConstraint(MIAPI mi, DatabaseAPI database, ProgramAPI program, MICallerAPI miCaller, UtilityAPI utility) {
     this.mi = mi;
