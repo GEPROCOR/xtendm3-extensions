@@ -2,8 +2,8 @@
  * README
  * This extension is used by Mashup
  *
- * Name : EXT010MI.AddConstraint
- * Description : Add records to the EXT010 table.
+ * Name : EXT010MI.UpdConstraint
+ * Description : Update records from the EXT010 table.
  * Date         Changed By   Description
  * 20210219     RENARN       QUAX01 - Constraints matrix
  * 20211102     RENARN       Input parameters HAZI and ZPDA have been added
@@ -12,26 +12,43 @@
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-public class AddConstraint extends ExtendM3Transaction {
+public class UpdConstraint extends ExtendM3Transaction {
   private final MIAPI mi
   private final LoggerAPI logger
   private final ProgramAPI program
   private final DatabaseAPI database
   private final SessionAPI session
   private final TransactionAPI transaction
-  private final MICallerAPI miCaller
-  private final UtilityAPI utility
-  private String NBNR
-  private String ZGKY
   private Integer zblc
-  private Integer ztps
+  private String itemNumber = ""
+  private String constrainingFeature = ""
+  private String constraintLevel = ""
+  private String supplierNumber = ""
+  private String customerNumber = ""
+  private String manufacturer = ""
+  private String CNUF = ""
+  private String country = ""
+  private String HScode = ""
+  private String IFLSfield = ""
+  private String mainIngredient = ""
+  private String contains = ""
+  private String brand = ""
+  private String controlCode = ""
+  private String PNM = ""
+  private String origin = ""
+  private String dangerClass = ""
+  private String orderType = ""
+  private String itemType = ""
+  private String dangerIndicator = ""
+  private String potentiallyDangerous = ""
+  private String ZGKY = ""
+  private String warehouse = ""
 
-  public AddConstraint(MIAPI mi, DatabaseAPI database, ProgramAPI program, MICallerAPI miCaller, UtilityAPI utility) {
+  public UpdConstraint(MIAPI mi, DatabaseAPI database, ProgramAPI program, LoggerAPI logger) {
     this.mi = mi
     this.database = database
     this.program = program
-    this.miCaller = miCaller
-    this.utility = utility
+    this.logger = logger
   }
 
   public void main() {
@@ -51,6 +68,7 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("Code article " + mi.in.get("ITNO") + " n'existe pas")
         return
       }
+      itemNumber = mi.in.get("ITNO").toString().trim()
     }
     // Check constraining feature
     if(mi.in.get("ZCFE") != null && mi.in.get("ZCFE") != "*"){
@@ -62,6 +80,7 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("Caractéristique contraignante " + mi.in.get("ZCFE") + " n'existe pas")
         return
       }
+      constrainingFeature = mi.in.get("ZCFE").toString().trim()
     }
     // Check constraint level
     zblc = 0
@@ -76,6 +95,7 @@ public class AddConstraint extends ExtendM3Transaction {
       } else {
         zblc = EXT012.get("EXZBLC")
       }
+      constraintLevel = mi.in.get("ZCLV").toString().trim()
     }
     // Check supplier
     if(mi.in.get("SUNO") != null && !(mi.in.get("SUNO") as String).contains("*")){
@@ -89,6 +109,7 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("Fournisseur " + mi.in.get("SUNO") + " n'existe pas")
         return
       }
+      supplierNumber = mi.in.get("SUNO").toString().trim()
     }
     // Check customer
     if(mi.in.get("CUNO") != null && mi.in.get("CUNO") != "*"){
@@ -100,6 +121,7 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("Client " + mi.in.get("CUNO") + " n'existe pas")
         return
       }
+      customerNumber = mi.in.get("CUNO").toString().trim()
     }
     // Check manufacturer
     if(mi.in.get("SUN1") != null && !(mi.in.get("SUN1") as String).contains("*")){
@@ -121,6 +143,7 @@ public class AddConstraint extends ExtendM3Transaction {
           return
         }
       }
+      manufacturer = mi.in.get("SUN1").toString().trim()
     }
     // Check CNUF
     if(mi.in.get("SUN3") != null && !(mi.in.get("SUN3") as String).contains("*")){
@@ -134,6 +157,7 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("CNUF " + mi.in.get("SUN3") + " n'existe pas")
         return
       }
+      CNUF = mi.in.get("SUN3").toString().trim()
     }
     // Check country
     if(mi.in.get("CSCD") != null && mi.in.get("CSCD") != "*"){
@@ -146,7 +170,16 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("Pays " + mi.in.get("CSCD") + " n'existe pas")
         return
       }
+      country = mi.in.get("CSCD").toString().trim()
     }
+    if(mi.in.get("CSNO") != null)
+      HScode = mi.in.get("CSNO").toString().trim()
+    if(mi.in.get("HIE0") != null)
+      IFLSfield = mi.in.get("HIE0").toString().trim()
+    if(mi.in.get("SPE1") != null)
+      mainIngredient = mi.in.get("SPE1").toString().trim()
+    if(mi.in.get("SPE2") != null)
+      contains = mi.in.get("SPE2").toString().trim()
     // Check brand
     if(mi.in.get("CFI1") != null && mi.in.get("CFI1") != "*"){
       DBAction countryQuery = database.table("CSYTAB").index("00").build()
@@ -158,6 +191,7 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("Marque " + mi.in.get("CFI1") + " n'existe pas")
         return
       }
+      brand = mi.in.get("CFI1").toString().trim()
     }
     // Check control code
     if(mi.in.get("CFI4") != null && mi.in.get("CFI4") != "*"){
@@ -170,6 +204,7 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("Code régie " + mi.in.get("CFI4") + " n'existe pas")
         return
       }
+      controlCode = mi.in.get("CFI4").toString().trim()
     }
     // Check PNM
     if(mi.in.get("CFI5") != null && mi.in.get("CFI5") != "*"){
@@ -182,6 +217,7 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("PNM " + mi.in.get("CFI5") + " n'existe pas")
         return
       }
+      PNM = mi.in.get("CFI5").toString().trim()
     }
     // Check percentage of mandatory lifetime
     int percentageOfMandatoryLifetime = 0
@@ -203,7 +239,10 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("Origine " + mi.in.get("CSC1") + " n'existe pas")
         return
       }
+      origin = mi.in.get("CSC1").toString().trim()
     }
+    if(mi.in.get("ZONU") != null)
+      dangerClass = mi.in.get("ZONU").toString().trim()
     // Check order type
     if(mi.in.get("ORTP") != null && mi.in.get("ORTP") != "*"){
       DBAction countryQuery = database.table("OOTYPE").index("00").build()
@@ -214,6 +253,7 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("Type commande " + mi.in.get("ORTP") + " n'existe pas")
         return
       }
+      orderType = mi.in.get("ORTP").toString().trim()
     }
     // Check item type
     if(mi.in.get("ITTY") != null && mi.in.get("ITTY") != "*"){
@@ -225,6 +265,7 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("Type article " + mi.in.get("ITTY") + " n'existe pas")
         return
       }
+      itemType = mi.in.get("ITTY").toString().trim()
     }
     // Check danger indicator
     if(mi.in.get("HAZI") != null && mi.in.get("HAZI") != 0 && mi.in.get("HAZI") != 1){
@@ -248,6 +289,7 @@ public class AddConstraint extends ExtendM3Transaction {
         mi.error("Dépôt " + mi.in.get("WHLO") + " n'existe pas")
         return
       }
+      warehouse = mi.in.get("WHLO").toString().trim()
     }
     // Check document ID 1
     if(mi.in.get("DO01") != null && mi.in.get("DO01") != "*"){
@@ -414,6 +456,18 @@ public class AddConstraint extends ExtendM3Transaction {
         return
       }
     }
+    DBAction query = database.table("EXT010").index("00").selection("EXITNO", "EXZCFE", "EXZCLV", "EXSUNO", "EXCUNO", "EXSUN1", "EXSUN3", "EXCSCD", "EXCSNO", "EXHIE0", "EXSPE1", "EXSPE2", /**"EXSUCM",**/ "EXCFI1", "EXCFI4", "EXCFI5", "EXZSLT", "EXZPLT", "EXCSC1", "EXORTP", "EXITTY", "EXZONU", "EXHAZI", "EXZPDA", "EXZTPS", "EXWHLO", "EXDO01", "EXDO02", "EXDO03", "EXDO04", "EXDO05", "EXDO06", "EXDO07", "EXDO08", "EXDO09", "EXDO10", "EXDO11", "EXDO12", "EXDO13", "EXDO14", "EXDO15", "EXTXID", "EXRGDT", "EXRGTM", "EXLMDT", "EXCHNO", "EXCHID").build()
+    DBContainer EXT010 = query.getContainer()
+    EXT010.set("EXCONO", currentCompany)
+    EXT010.set("EXZCID",  mi.in.get("ZCID"))
+    if(!query.readAll(EXT010, 2, outData)){
+      mi.error("L'enregistrement n'existe pas")
+      return
+    }
+    EXT010.set("EXCONO", currentCompany)
+    EXT010.set("EXZCID", mi.in.get("ZCID"))
+    if(!query.readLock(EXT010, updateCallBack)){
+    }
 
     // Check text id
     int txid = 0
@@ -424,257 +478,172 @@ public class AddConstraint extends ExtendM3Transaction {
         return
       }
     }
-
+  }
+  // Update EXT010
+  Closure<?> updateCallBack = { LockedResult lockedResult ->
     LocalDateTime timeOfCreation = LocalDateTime.now()
-    DBAction query = database.table("EXT010").index("30").build()
-    DBContainer EXT010 = query.getContainer()
-    EXT010.set("EXCONO", currentCompany)
-    String itemNumber = ""
-    if(mi.in.get("ITNO") != null){
-      itemNumber = mi.in.get("ITNO")
-    }
-    EXT010.set("EXITNO", itemNumber)
-    String constrainingFeature = ""
-    if(mi.in.get("ZCFE") != null){
-      constrainingFeature = mi.in.get("ZCFE")
-    }
-    EXT010.set("EXZCFE", constrainingFeature)
-    String constraintLevel = ""
+    int changeNumber = lockedResult.get("EXCHNO")
+    if(mi.in.get("ITNO") != null)
+      lockedResult.set("EXITNO", mi.in.get("ITNO"))
+    if(mi.in.get("ZCFE") != null)
+      lockedResult.set("EXZCFE", mi.in.get("ZCFE"))
     if(mi.in.get("ZCLV") != null){
-      constraintLevel = mi.in.get("ZCLV")
+      lockedResult.set("EXZCLV", mi.in.get("ZCLV"))
+      lockedResult.set("EXZBLC", zblc)
     }
-    EXT010.set("EXZCLV", constraintLevel)
-    String supplierNumber = ""
-    if(mi.in.get("SUNO") != null){
-      supplierNumber = mi.in.get("SUNO")
-    }
-    EXT010.set("EXSUNO", supplierNumber)
-    String customerNumber = ""
-    if(mi.in.get("CUNO") != null){
-      customerNumber = mi.in.get("CUNO")
-    }
-    EXT010.set("EXCUNO", customerNumber)
-    String manufacturer = ""
-    if(mi.in.get("SUN1") != null){
-      manufacturer = mi.in.get("SUN1")
-    }
-    EXT010.set("EXSUN1", manufacturer)
-    String CNUF = ""
-    if(mi.in.get("SUN3") != null){
-      CNUF = mi.in.get("SUN3")
-    }
-    EXT010.set("EXSUN3", CNUF)
-    String country = ""
-    if(mi.in.get("CSCD") != null){
-      country = mi.in.get("CSCD")
-    }
-    EXT010.set("EXCSCD", country)
-    String HScode = ""
-    if(mi.in.get("CSNO") != null){
-      HScode = mi.in.get("CSNO")
-    }
-    EXT010.set("EXCSNO", HScode)
-    String IFLSfield = ""
-    if(mi.in.get("HIE0") != null){
-      IFLSfield = mi.in.get("HIE0")
-    }
-    EXT010.set("EXHIE0", IFLSfield)
-    String mainIngredient = ""
-    if(mi.in.get("SPE1") != null){
-      mainIngredient = mi.in.get("SPE1")
-    }
-    EXT010.set("EXSPE1", mainIngredient)
-    String contains = ""
-    if(mi.in.get("SPE2") != null){
-      contains = mi.in.get("SPE2")
-    }
-    EXT010.set("EXSPE2", contains)
-    /**
-     String GLNcode = ""
-     if(mi.in.get("SUCM") != null){
-     GLNcode = mi.in.get("SUCM")
-     }
-     EXT010.set("EXSUCM", GLNcode)
-     **/
-    String brand = ""
-    if(mi.in.get("CFI1") != null){
-      brand = mi.in.get("CFI1")
-    }
-    EXT010.set("EXCFI1", brand)
-    String controlCode = ""
-    if(mi.in.get("CFI4") != null){
-      controlCode = mi.in.get("CFI4")
-    }
-    EXT010.set("EXCFI4", controlCode)
-    String PNM = ""
-    if(mi.in.get("CFI5") != null){
-      PNM = mi.in.get("CFI5")
-    }
-    EXT010.set("EXCFI5", PNM)
-    int standardLifetime = 0
-    if(mi.in.get("ZSLT") != null){
-      standardLifetime = mi.in.get("ZSLT")
-    }
-    EXT010.set("EXZSLT", standardLifetime)
-    percentageOfMandatoryLifetime = 0
-    if(mi.in.get("ZPLT") != null){
-      percentageOfMandatoryLifetime = mi.in.get("ZPLT")
-    }
-    EXT010.set("EXZPLT", percentageOfMandatoryLifetime)
-    String origin = ""
-    if(mi.in.get("CSC1") != null){
-      origin = mi.in.get("CSC1")
-    }
-    EXT010.set("EXCSC1", origin)
-    String dangerClass = ""
-    if(mi.in.get("ZONU") != null){
-      dangerClass = mi.in.get("ZONU")
-    }
-    EXT010.set("EXZONU", dangerClass)
-    String orderType = ""
-    if(mi.in.get("ORTP") != null){
-      orderType = mi.in.get("ORTP")
-    }
-    EXT010.set("EXORTP", orderType)
-    String itemType = ""
-    if(mi.in.get("ITTY") != null){
-      itemType = mi.in.get("ITTY")
-    }
-    EXT010.set("EXITTY", itemType)
-    Integer dangerIndicator = 0
-    if(mi.in.get("HAZI") != null){
-      dangerIndicator = mi.in.get("HAZI") as Integer
-    }
-    EXT010.set("EXHAZI", dangerIndicator)
-    Integer potentiallyDangerous = 0
-    if(mi.in.get("ZPDA") != null){
-      potentiallyDangerous = mi.in.get("ZPDA") as Integer
-    }
-    EXT010.set("EXZPDA", potentiallyDangerous)
-    String warehouse = ""
-    if(mi.in.get("WHLO") != null){
-      warehouse = mi.in.get("WHLO")
-    }
-    EXT010.set("EXWHLO", warehouse)
-    String documentID1 = ""
-    if(mi.in.get("DO01") != null){
-      documentID1 = mi.in.get("DO01")
-    }
-    EXT010.set("EXDO01", documentID1)
-    String documentID2 = ""
-    if(mi.in.get("DO02") != null){
-      documentID2 = mi.in.get("DO02")
-    }
-    EXT010.set("EXDO02", documentID2)
-    String documentID3 = ""
-    if(mi.in.get("DO03") != null){
-      documentID3 = mi.in.get("DO03")
-    }
-    EXT010.set("EXDO03", documentID3)
-    String documentID4 = ""
-    if(mi.in.get("DO04") != null){
-      documentID4 = mi.in.get("DO04")
-    }
-    EXT010.set("EXDO04", documentID4)
-    String documentID5 = ""
-    if(mi.in.get("DO05") != null){
-      documentID5 = mi.in.get("DO05")
-    }
-    EXT010.set("EXDO05", documentID5)
-    String documentID6 = ""
-    if(mi.in.get("DO06") != null){
-      documentID6 = mi.in.get("DO06")
-    }
-    EXT010.set("EXDO06", documentID6)
-    String documentID7 = ""
-    if(mi.in.get("DO07") != null){
-      documentID7 = mi.in.get("DO07")
-    }
-    EXT010.set("EXDO07", documentID7)
-    String documentID8 = ""
-    if(mi.in.get("DO08") != null){
-      documentID8 = mi.in.get("DO08")
-    }
-    EXT010.set("EXDO08", documentID8)
-    String documentID9 = ""
-    if(mi.in.get("DO09") != null){
-      documentID9 = mi.in.get("DO09")
-    }
-    EXT010.set("EXDO09", documentID9)
-    String documentID10 = ""
-    if(mi.in.get("DO10") != null){
-      documentID10 = mi.in.get("DO10")
-    }
-    EXT010.set("EXDO10", documentID10)
-    String documentID11 = ""
-    if(mi.in.get("DO11") != null){
-      documentID11 = mi.in.get("DO11")
-    }
-    EXT010.set("EXDO11", documentID11)
-    String documentID12 = ""
-    if(mi.in.get("DO12") != null){
-      documentID12 = mi.in.get("DO12")
-    }
-    EXT010.set("EXDO12", documentID12)
-    String documentID13 = ""
-    if(mi.in.get("DO13") != null){
-      documentID13 = mi.in.get("DO13")
-    }
-    EXT010.set("EXDO13", documentID13)
-    String documentID14 = ""
-    if(mi.in.get("DO14") != null){
-      documentID14 = mi.in.get("DO14")
-    }
-    EXT010.set("EXDO14", documentID14)
-    String documentID15 = ""
-    if(mi.in.get("DO15") != null){
-      documentID15 = mi.in.get("DO15")
-    }
-    EXT010.set("EXDO15", documentID15)
-    txid = 0
-    if(mi.in.get("TXID") != null){
-      txid = mi.in.get("TXID")
-    }
-    ztps = 0
-    if(mi.in.get("ZTPS") != null){
-      ztps = mi.in.get("ZTPS")
-    }
-    EXT010.set("EXZBLC", zblc)
-    EXT010.set("EXTXID", txid)
-    EXT010.set("EXZTPS", ztps)
-    EXT010.setInt("EXRGDT", timeOfCreation.format(DateTimeFormatter.ofPattern("yyyyMMdd")) as Integer)
-    EXT010.setInt("EXRGTM", timeOfCreation.format(DateTimeFormatter.ofPattern("HHmmss")) as Integer)
-    EXT010.setInt("EXLMDT", timeOfCreation.format(DateTimeFormatter.ofPattern("yyyyMMdd")) as Integer)
-    EXT010.setInt("EXCHNO", 1)
-    EXT010.set("EXCHID", program.getUser())
-    ZGKY = itemNumber + constrainingFeature + constraintLevel + supplierNumber + customerNumber + manufacturer + CNUF + country + HScode + IFLSfield + mainIngredient + brand + controlCode + PNM + origin + dangerClass + contains + orderType + itemType + (dangerIndicator as String) + (potentiallyDangerous as String) + warehouse
-    EXT010.set("EXZGKY", ZGKY)
-    if(!query.readAll(EXT010, 2, outData)){
-      // Retrieve constraint ID
-      executeCRS165MIRtvNextNumber("ZA", "A")
-      EXT010.set("EXZCID",  NBNR as Integer)
-      String constraintID = EXT010.get("EXZCID")
-      query.insert(EXT010)
-      mi.outData.put("ZCID", constraintID)
-      mi.write()
-    } else {
-      mi.error("L'enregistrement existe déjà")
-      return
-    }
+    if(mi.in.get("SUNO") != null)
+      lockedResult.set("EXSUNO", mi.in.get("SUNO"))
+    if(mi.in.get("CUNO") != null)
+      lockedResult.set("EXCUNO", mi.in.get("CUNO"))
+    if(mi.in.get("SUN1") != null)
+      lockedResult.set("EXSUN1", mi.in.get("SUN1"))
+    if(mi.in.get("SUN3") != null)
+      lockedResult.set("EXSUN3", mi.in.get("SUN3"))
+    if(mi.in.get("CSCD") != null)
+      lockedResult.set("EXCSCD", mi.in.get("CSCD"))
+    if(mi.in.get("CSNO") != null)
+      lockedResult.set("EXCSNO", mi.in.get("CSNO"))
+    if(mi.in.get("HIE0") != null)
+      lockedResult.set("EXHIE0", mi.in.get("HIE0"))
+    if(mi.in.get("SPE1") != null)
+      lockedResult.set("EXSPE1", mi.in.get("SPE1"))
+    if(mi.in.get("SPE2") != null)
+      lockedResult.set("EXSPE2", mi.in.get("SPE2"))
+    //if(mi.in.get("SUCM") != null)
+    //lockedResult.set("EXSUCM", mi.in.get("SUCM"))
+    if(mi.in.get("CFI1") != null)
+      lockedResult.set("EXCFI1", mi.in.get("CFI1"))
+    if(mi.in.get("CFI4") != null)
+      lockedResult.set("EXCFI4", mi.in.get("CFI4"))
+    if(mi.in.get("CFI5") != null)
+      lockedResult.set("EXCFI5", mi.in.get("CFI5"))
+    if(mi.in.get("ZSLT") != null)
+      lockedResult.set("EXZSLT", mi.in.get("ZSLT"))
+    if(mi.in.get("ZPLT") != null)
+      lockedResult.set("EXZPLT", mi.in.get("ZPLT"))
+    if(mi.in.get("CSC1") != null)
+      lockedResult.set("EXCSC1", mi.in.get("CSC1"))
+    if(mi.in.get("ORTP") != null)
+      lockedResult.set("EXORTP", mi.in.get("ORTP"))
+    if(mi.in.get("ITTY") != null)
+      lockedResult.set("EXITTY", mi.in.get("ITTY"))
+    if(mi.in.get("HAZI") != null)
+      lockedResult.set("EXHAZI", mi.in.get("HAZI"))
+    if(mi.in.get("ZPDA") != null)
+      lockedResult.set("EXZPDA", mi.in.get("ZPDA"))
+    if(mi.in.get("ZONU") != null)
+      lockedResult.set("EXZONU", mi.in.get("ZONU"))
+    if(mi.in.get("WHLO") != null)
+      lockedResult.set("EXWHLO", mi.in.get("WHLO"))
+    if(mi.in.get("DO01") != null)
+      lockedResult.set("EXDO01", mi.in.get("DO01"))
+    if(mi.in.get("DO02") != null)
+      lockedResult.set("EXDO02", mi.in.get("DO02"))
+    if(mi.in.get("DO03") != null)
+      lockedResult.set("EXDO03", mi.in.get("DO03"))
+    if(mi.in.get("DO04") != null)
+      lockedResult.set("EXDO04", mi.in.get("DO04"))
+    if(mi.in.get("DO05") != null)
+      lockedResult.set("EXDO05", mi.in.get("DO05"))
+    if(mi.in.get("DO06") != null)
+      lockedResult.set("EXDO06", mi.in.get("DO06"))
+    if(mi.in.get("DO07") != null)
+      lockedResult.set("EXDO07", mi.in.get("DO07"))
+    if(mi.in.get("DO08") != null)
+      lockedResult.set("EXDO08", mi.in.get("DO08"))
+    if(mi.in.get("DO09") != null)
+      lockedResult.set("EXDO09", mi.in.get("DO09"))
+    if(mi.in.get("DO10") != null)
+      lockedResult.set("EXDO10", mi.in.get("DO10"))
+    if(mi.in.get("DO11") != null)
+      lockedResult.set("EXDO11", mi.in.get("DO11"))
+    if(mi.in.get("DO12") != null)
+      lockedResult.set("EXDO12", mi.in.get("DO12"))
+    if(mi.in.get("DO13") != null)
+      lockedResult.set("EXDO13", mi.in.get("DO13"))
+    if(mi.in.get("DO14") != null)
+      lockedResult.set("EXDO14", mi.in.get("DO14"))
+    if(mi.in.get("DO15") != null)
+      lockedResult.set("EXDO15", mi.in.get("DO15"))
+    if(mi.in.get("TXID") != null)
+      lockedResult.set("EXTXID", mi.in.get("TXID"))
+    if(mi.in.get("ZTPS") != null)
+      lockedResult.set("EXZTPS", mi.in.get("ZTPS"))
+    lockedResult.set("EXZGKY", ZGKY)
+    lockedResult.setInt("EXLMDT", timeOfCreation.format(DateTimeFormatter.ofPattern("yyyyMMdd")) as Integer)
+    lockedResult.setInt("EXCHNO", changeNumber + 1)
+    lockedResult.set("EXCHID", program.getUser())
+    lockedResult.update()
   }
-  // Execute CRS165MI.RtvNextNumber
-  private executeCRS165MIRtvNextNumber(String NBTY, String NBID){
-    def parameters = ["NBTY": NBTY, "NBID": NBID]
-    Closure<?> handler = { Map<String, String> response ->
-      NBNR = response.NBNR.trim()
-
-      if (response.error != null) {
-        return mi.error("Failed CRS165MI.RtvNextNumber: "+ response.errorMessage)
-      }
+  // Get EXT010
+  Closure<?> outData = { DBContainer EXT010 ->
+    if(itemNumber == ""){
+      itemNumber = EXT010.get("EXITNO").toString().trim()
     }
-    miCaller.call("CRS165MI", "RtvNextNumber", parameters, handler)
-  }
-
-  Closure<?> outData = { DBContainer EXT012 ->
+    if(constrainingFeature == ""){
+      constrainingFeature = EXT010.get("EXZCFE").toString().trim()
+    }
+    if(constraintLevel == ""){
+      constraintLevel = EXT010.get("EXZCLV").toString().trim()
+    }
+    if(supplierNumber == ""){
+      supplierNumber = EXT010.get("EXSUNO").toString().trim()
+    }
+    if(customerNumber == ""){
+      customerNumber = EXT010.get("EXCUNO").toString().trim()
+    }
+    if(manufacturer == ""){
+      manufacturer = EXT010.get("EXSUN1").toString().trim()
+    }
+    if(CNUF == ""){
+      CNUF = EXT010.get("EXSUN3").toString().trim()
+    }
+    if(country == ""){
+      country = EXT010.get("EXCSCD").toString().trim()
+    }
+    if(HScode == ""){
+      HScode = EXT010.get("EXCSNO").toString().trim()
+    }
+    if(IFLSfield.trim() == ""){
+      IFLSfield = EXT010.get("EXHIE0").toString().trim()
+    }
+    if(mainIngredient == ""){
+      mainIngredient = EXT010.get("EXSPE1").toString().trim()
+    }
+    if(contains == ""){
+      contains = EXT010.get("EXSPE2").toString().trim()
+    }
+    if(brand == ""){
+      brand = EXT010.get("EXCFI1").toString().trim()
+    }
+    if(controlCode == ""){
+      controlCode = EXT010.get("EXCFI4").toString().trim()
+    }
+    if(PNM == ""){
+      PNM = EXT010.get("EXCFI5").toString().trim()
+    }
+    if(origin == ""){
+      origin = EXT010.get("EXCSC1").toString().trim()
+    }
+    if(dangerClass == ""){
+      dangerClass = EXT010.get("EXZONU").toString().trim()
+    }
+    if(orderType == ""){
+      orderType = EXT010.get("EXORTP").toString().trim()
+    }
+    if(itemType == ""){
+      itemType = EXT010.get("EXITTY").toString().trim()
+    }
+    if(dangerIndicator == ""){
+      dangerIndicator = EXT010.get("EXHAZI").toString().trim()
+    }
+    if(potentiallyDangerous == ""){
+      potentiallyDangerous = EXT010.get("EXZPDA").toString().trim()
+    }
+    if(warehouse == ""){
+      warehouse = EXT010.get("EXWHLO").toString().trim()
+    }
+    ZGKY = itemNumber + constrainingFeature + constraintLevel + supplierNumber + customerNumber + manufacturer + CNUF + country + HScode + IFLSfield + mainIngredient + brand + controlCode + PNM + origin + dangerClass + contains + orderType + itemType + dangerIndicator + potentiallyDangerous + warehouse
+    logger.debug("ZGKY" + ZGKY)
   }
 }
