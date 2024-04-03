@@ -2,12 +2,13 @@
  * README
  * This extension is used by Mashup
  *
- * Name : EXT022MI.LstSalesPoint
- * Description : List records to the EXT022 table.
+ * Name : EXT022MI.GetSalesPoint
+ * Description : Get records to the EXT022 table.
  * Date         Changed By   Description
- * 20230313     RENARN       CMDX06 - Gestion liste des points de vente
+ * 20230313     RENARN       CMDX06 - Gestion récupération d'un point de vente
+ * 20230613     YVOYOU       CMDX06 - ZCFE  is not mandatory
  */
-public class LstSalesPoint extends ExtendM3Transaction {
+public class GetSalesPoint extends ExtendM3Transaction {
   private final MIAPI mi;
   private final LoggerAPI logger
   private final ProgramAPI program
@@ -18,7 +19,7 @@ public class LstSalesPoint extends ExtendM3Transaction {
   private final UtilityAPI utility
   private Integer currentCompany
 
-  public LstSalesPoint(MIAPI mi, DatabaseAPI database, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, UtilityAPI utility) {
+  public GetSalesPoint(MIAPI mi, DatabaseAPI database, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, UtilityAPI utility) {
     this.mi = mi;
     this.database = database
     this.logger = logger
@@ -34,12 +35,18 @@ public class LstSalesPoint extends ExtendM3Transaction {
       mi.error("Code client est obligatoire!")
       return
     }
+    // Check constraint
+    if(getInParam("ZCFE").isEmpty()){
+      mi.error("Contrainte est obligatoire!")
+      return
+    }
     DBAction query = database.table("EXT022").index("00").selection("EXCUNO", "EXADID", "EXZCFE", "EXDLSP").build()
     DBContainer EXT022 = query.getContainer()
     EXT022.set("EXCONO", currentCompany)
     EXT022.set("EXCUNO", getInParam("CUNO"))
     EXT022.set("EXADID", getInParam("ADID"))
-    if(!query.readAll(EXT022, !getInParam("ADID").isEmpty()?3:2, outData)){
+    EXT022.set("EXZCFE", getInParam("ZCFE"))
+    if(!query.readAll(EXT022, 4, outData)){
       mi.error("L'enregistrement n'existe pas")
       return
     }
@@ -58,10 +65,8 @@ public class LstSalesPoint extends ExtendM3Transaction {
   public String getInParam(String name) {
     logger.debug(String.format("Get input parameter %s : value %s", name, mi.in.get(name)))
     if (mi.in.get(name)==null) {
-      //logger.debug(String.format("return empty cause parameter %s is null", name))
       return ""
     } else {
-      //logger.debug(String.format("return value %s", ((String)mi.in.get(name)).trim())
       return ((String)mi.in.get(name)).trim()
     }
   }

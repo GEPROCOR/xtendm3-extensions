@@ -2,36 +2,67 @@
  * README
  * This extension is used by Mashup
  *
- * Name : EXT020MI.DltSalesPoint
- * Description : The DltSalesPoint transaction delete records to the EXT020 table.
+ * Name : EXT022MI.DelSalesPoint
+ * Description : Delete records to the EXT022 table.
  * Date         Changed By   Description
- * 20210510     CDUV         CMDX06 - Gestion des points de vente
+ * 20230313     RENARN       CMDX06 - Gestion suppression des points de vente
  */
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.concurrent.TimeUnit
-
-public class DltSalesPoint extends ExtendM3Transaction {
+public class DelSalesPoint extends ExtendM3Transaction {
   private final MIAPI mi;
-  private final DatabaseAPI database
   private final LoggerAPI logger
+  private final ProgramAPI program
+  private final DatabaseAPI database
+  private final SessionAPI session
+  private final TransactionAPI transaction
+  private final MICallerAPI miCaller
+  private final UtilityAPI utility
+  private Integer currentCompany
 
-  public DltSalesPoint(MIAPI mi, DatabaseAPI database, LoggerAPI logger) {
+  public DelSalesPoint(MIAPI mi, DatabaseAPI database, LoggerAPI logger, ProgramAPI program, MICallerAPI miCaller, UtilityAPI utility) {
     this.mi = mi;
     this.database = database
     this.logger = logger
+    this.program = program
+    this.utility = utility
+    this.miCaller = miCaller
   }
 
   public void main() {
-    DBAction action = database.table("EXT020").index("00").selection("EXCONO", "EXTYPE", "EXFPVT", "EXTPVT", "EXWHTY", "EXTX40", "EXCOPE", "EXSCAT", "EXLSCA", "EXCUNO", "EXCUNM", "EXCDAN", "EXOTYG", "EXSTAT", "EXRGDT", "EXRGTM", "EXLMDT", "EXCHNO", "EXCHID").build()
-    DBContainer EXT020 = action.createContainer()
-    EXT020.setInt("EXCONO", mi.inData.get("CONO").toInteger())
-    EXT020.set("EXTYPE", mi.inData.get("TYPE"))
-    action.readAllLock(EXT020, 2, releaseExtends)
+    currentCompany = (Integer)program.getLDAZD().CONO
+    // Check customer
+    if(getInParam("CUNO").isEmpty()){
+      mi.error("Code client est obligatoire!")
+      return
+    }
+
+    // Remove value from EXT022
+    DBAction action = database.table("EXT022").index("00").build()
+    DBContainer EXT022 = action.createContainer()
+    EXT022.set("EXCONO", currentCompany)
+    EXT022.set("EXCUNO", getInParam("CUNO"))
+    EXT022.set("EXADID", getInParam("ADID"))
+    EXT022.set("EXZCFE", getInParam("ZCFE"))
+    int lfNb = !getInParam("ZCFE").isEmpty()?4:3
+    if (!action.readAllLock(EXT022, lfNb,deleteCallBack)) {
+      mi.error(String.format("Point de vente n'existe pas pour ce client/adresse/contrainte (Clé %s) !", String.valueOf(lfNb)))
+      return
+    }
+  }
+  Closure<?> deleteCallBack = { LockedResult lockedResult ->
+    lockedResult.delete()
   }
 
-  Closure<?> releaseExtends = { LockedResult record ->
-    record.delete()
+  /**
+   * GetInParam - Get input parameter
+   **/
+  public String getInParam(String name) {
+    logger.debug(String.format("Get input parameter %s : value %s", (String)name, mi.in.get(name)))
+    if (mi.in.get(name)==null) {
+      logger.debug(String.format("return empty cause parameter %s is null", name))
+      return ""
+    } else {
+      logger.debug(String.format("return value %s", ((String)mi.in.get(name)).trim()))
+      return ((String)mi.in.get(name)).trim()
+    }
   }
 }
