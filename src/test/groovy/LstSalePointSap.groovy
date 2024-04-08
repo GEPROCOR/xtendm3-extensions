@@ -46,7 +46,7 @@ public class LstSalePointSap extends ExtendM3Transaction {
       DBAction query = database.table("EXT150").index("00").matching(expression).selection("EXNPVT", "EXPVSA", "EXRGDT", "EXRGTM", "EXLMDT", "EXCHNO", "EXCHID").build()
       DBContainer EXT150 = query.getContainer()
       EXT150.set("EXCONO", currentCompany)
-      if(!query.readAll(EXT150, 1, outData)){
+      if(!query.readAll(EXT150, 1, 10000, outData)){
         mi.error("L'enregistrement n'existe pas")
         return
       }
