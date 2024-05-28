@@ -214,7 +214,7 @@ public class PPS600_PECHK extends ExtendM3Trigger {
 
   // Execute EXT800MI GetParam to retrieve general settings
   private executeEXT800MIGetParam(String EXNM){
-    def parameters = ["EXNM": EXNM]
+    Map<String, String> parameters = ["EXNM": EXNM]
     Closure<?> handler = { Map<String, String> response ->
       if (response.error != null) {
         IN60 = true
@@ -249,7 +249,7 @@ public class PPS600_PECHK extends ExtendM3Trigger {
   }
   // Execute PPS215MI GetPOCharge to retrieve PO charge
   private executePPS215MIGetPOCharge(String PUNO, String PNLI, String CDSE, String EXTY, String CEID){
-    def parameters = ["PUNO": PUNO, "PNLI": PNLI, "CDSE": CDSE, "EXTY": EXTY, "CEID": CEID]
+    Map<String, String> parameters = ["PUNO": PUNO, "PNLI": PNLI, "CDSE": CDSE, "EXTY": EXTY, "CEID": CEID]
     Closure<?> handler = { Map<String, String> response ->
       IN60 = false
       error = ""
@@ -267,7 +267,7 @@ public class PPS600_PECHK extends ExtendM3Trigger {
   }
   // Execute PPS215MI UpdPOCharge to update PO charge
   private executePPS215MIUpdPOCharge(String PUNO, String CDSE, String EXTY, String CEID, String OVHE){
-    def parameters = ["PUNO": PUNO, "CDSE": CDSE, "EXTY": EXTY, "CEID": CEID, "OVHE": OVHE]
+    Map<String, String> parameters = ["PUNO": PUNO, "CDSE": CDSE, "EXTY": EXTY, "CEID": CEID, "OVHE": OVHE]
     Closure<?> handler = { Map<String, String> response ->
       IN60 = false
       error = ""
@@ -282,7 +282,7 @@ public class PPS600_PECHK extends ExtendM3Trigger {
   }
   // Execute PPS370MI AddHead to add PO header
   private executePPS370MIAddHead(String MSGN, String FACI, String WHLO, String SUNO, String ORTY, String DWDT, String YRE1, String BUYE, String PURC){
-    def parameters = ["MSGN": MSGN, "FACI": FACI, "WHLO": WHLO, "SUNO": SUNO, "ORTY": ORTY, "DWDT": DWDT, "YRE1": YRE1, "BUYE": BUYE, "PURC": PURC]
+    Map<String, String> parameters = ["MSGN": MSGN, "FACI": FACI, "WHLO": WHLO, "SUNO": SUNO, "ORTY": ORTY, "DWDT": DWDT, "YRE1": YRE1, "BUYE": BUYE, "PURC": PURC]
     Closure<?> handler = { Map<String, String> response ->
       IN60 = false
       error = ""
@@ -300,7 +300,7 @@ public class PPS600_PECHK extends ExtendM3Trigger {
   }
   // Execute PPS370MI AddLine to add PO line
   private executePPS370MIAddLine(String MSGN, String PUNO, String ITNO, String ORQA, String PUPR, String DWDT){
-    def parameters = ["MSGN": MSGN, "PUNO": PUNO, "ITNO": ITNO, "ORQA": ORQA, "PUPR": PUPR, "DWDT": DWDT]
+    Map<String, String> parameters = ["MSGN": MSGN, "PUNO": PUNO, "ITNO": ITNO, "ORQA": ORQA, "PUPR": PUPR, "DWDT": DWDT]
     Closure<?> handler = { Map<String, String> response ->
       IN60 = false
       error = ""
@@ -315,7 +315,7 @@ public class PPS600_PECHK extends ExtendM3Trigger {
   }
   // Execute PPS370MI StartEntry to start the entry of the PO
   private executePPS370MIStartEntry(String BAOR){
-    def parameters = ["BAOR": BAOR]
+    Map<String, String> parameters = ["BAOR": BAOR]
     Closure<?> handler = { Map<String, String> response ->
       IN60 = false
       error = ""
@@ -333,7 +333,7 @@ public class PPS600_PECHK extends ExtendM3Trigger {
   }
   // Execute PPS370MI FinishEntry to finish the entry of the PO
   private executePPS370MIFinishEntry(String MSGN){
-    def parameters = ["MSGN": MSGN]
+    Map<String, String> parameters = ["MSGN": MSGN]
     Closure<?> handler = { Map<String, String> response ->
       IN60 = false
       error = ""
