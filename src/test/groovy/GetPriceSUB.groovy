@@ -135,7 +135,7 @@ public class GetPriceSUB extends ExtendM3Transaction {
       DBContainer MPHEAD = query0.getContainer()
       MPHEAD.set("IACONO", currentCompany)
       MPHEAD.set("IAPUNO", mi.in.get("PUNO"))
-      if(!query0.readAll(MPHEAD, 2, 1, outData_MPHEAD)){
+      if(!query0.readAll(MPHEAD, 2, 1, outDataMPHEAD)){
       }
       executePPS295MILstPurCostSim(inWHLO, inITNO, inSUNO, inAGNB)
       if (IN60==false) {
@@ -146,7 +146,7 @@ public class GetPriceSUB extends ExtendM3Transaction {
         CUGEX1.set("F1CONO", currentCompany)
         CUGEX1.set("F1FILE", "OPRICH")
         CUGEX1.set("F1PK01", inPRRF)
-        if(!query1.readAll(CUGEX1, 3, 1, outData_CUGEX1)){
+        if(!query1.readAll(CUGEX1, 3, 1, outDataCUGEX1)){
         }
       }
     }
@@ -155,12 +155,12 @@ public class GetPriceSUB extends ExtendM3Transaction {
     mi.write()
   }
   // Retrieve MPHEAD
-  Closure<?> outData_MPHEAD = { DBContainer MPHEAD ->
+  Closure<?> outDataMPHEAD = { DBContainer MPHEAD ->
     // Get item criteria value
     inSUNO = MPHEAD.get("IASUNO")
   }
   // Retrieve CUGEX1
-  Closure<?> outData_CUGEX1 = { DBContainer CUGEX1 ->
+  Closure<?> outDataCUGEX1 = { DBContainer CUGEX1 ->
     // Get item criteria value
     logger.debug("Step2")
     double coefDouble = CUGEX1.get("F1N096")
@@ -175,8 +175,10 @@ public class GetPriceSUB extends ExtendM3Transaction {
       outSAPR = numSAPR.toString()
     }
   }
+
+  // Execute OIS320MI GetPriceLine
   private executeOIS320MIGetPriceLine(String CUNO, String ITNO, String WHLO, String ORTP, String PRRF){
-    def parameters = ["CUNO": CUNO, "ITNO": ITNO, "WHLO": WHLO, "ORTP": ORTP, "PRRF": PRRF]
+    Map<String, String> parameters = ["CUNO": CUNO, "ITNO": ITNO, "WHLO": WHLO, "ORTP": ORTP, "PRRF": PRRF]
     Closure<?> handler = { Map<String, String> response ->
       if (response.error != null) {
         IN60 = true
@@ -188,8 +190,9 @@ public class GetPriceSUB extends ExtendM3Transaction {
     }
     miCaller.call("OIS320MI", "GetPriceLine", parameters, handler)
   }
+  // Execute PPS295MI LstPurCostSim
   private executePPS295MILstPurCostSim(String WHLO, String ITNO, String SUNO, String AGNB){
-    def parameters = ["ITNO": ITNO, "WHLO": WHLO, "SUNO": SUNO, "AGNB": AGNB]
+    Map<String, String> parameters = ["ITNO": ITNO, "WHLO": WHLO, "SUNO": SUNO, "AGNB": AGNB]
     Closure<?> handler = { Map<String, String> response ->
       if (response.error != null) {
         IN60 = true
