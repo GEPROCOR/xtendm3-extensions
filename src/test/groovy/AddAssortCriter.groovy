@@ -36,6 +36,16 @@ public class AddAssortCriter extends ExtendM3Transaction {
       currentCompany = mi.in.get("CONO");
     }
 
+    Closure<?> Updater = { DBContainer LockedResult ->
+      logger.debug("LockedResult ")
+      // TODO do your stuff
+      //LockedResult.update()
+      //LockedResult.delete()
+    }
+
+    if (!Query.readAllLock(Request, 2, maxCountReadAll, Updater)) {
+      // TODO do your stuff
+    }
     if(mi.in.get("CUNO") != null){
       DBAction countryQuery = database.table("OCUSMA").index("00").build();
       DBContainer OCUSMA = countryQuery.getContainer();
