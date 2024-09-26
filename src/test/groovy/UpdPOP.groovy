@@ -14,10 +14,6 @@
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.GregorianCalendar
-import java.util.Calendar
-import java.util.Date
-import java.text.SimpleDateFormat
 public class UpdPOP extends ExtendM3Transaction {
   private final MIAPI mi
   private final DatabaseAPI database
@@ -26,7 +22,6 @@ public class UpdPOP extends ExtendM3Transaction {
   private final ProgramAPI program
   private final UtilityAPI utility
   private int currentCompany
-  private String currentDate
   private Integer iPLPN = 0
   private Integer iPLPS = 0
   private Integer iPLP2 = 0
@@ -169,12 +164,10 @@ public class UpdPOP extends ExtendM3Transaction {
   }
   // Execute PPS170MI.UpdPOP
   private executePPS170MIUpdPOP(String PLPN, String PLPS, String PLP2, String PLDT){
-    def parameters = ["PLPN": PLPN, "PLPS": PLPS, "PLP2": PLP2, "PLDT": PLDT]
+    Map<String, String> parameters = ["PLPN": PLPN, "PLPS": PLPS, "PLP2": PLP2, "PLDT": PLDT]
     Closure<?> handler = { Map<String, String> response ->
       if (response.error != null) {
         IN60 = true
-        //return mi.error("Failed PPS170MI.UpdPOP: "+ response.errorMessage)
-        //logger.debug("message = " + response.errorMessage)
       } else {
       }
     }
@@ -182,7 +175,7 @@ public class UpdPOP extends ExtendM3Transaction {
   }
   // Exceute MMS200MI.GetItmWhsBasic
   private executeMMS200MIGetItmWhsBasic(String WHLO, String ITNO){
-    def parameters = ["WHLO": WHLO, "ITNO": ITNO, "AFLM": "1"]
+    Map<String, String> parameters = ["WHLO": WHLO, "ITNO": ITNO, "AFLM": "1"]
     Closure<?> handler = { Map<String, String> response ->
       LEAT = response.LEAT.trim()
       LEA1 = response.LEA1.trim()
