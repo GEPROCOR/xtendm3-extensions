@@ -42,7 +42,6 @@ public class AddAssortCriter extends ExtendM3Transaction {
       //LockedResult.update()
       //LockedResult.delete()
     }
-
     if (!Query.readAllLock(Request, 2, maxCountReadAll, Updater)) {
       // TODO do your stuff
     }
