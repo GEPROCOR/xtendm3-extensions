@@ -7,17 +7,17 @@
  * Date         Changed By   Description
  * 20210219     RENARN       QUAX01 - Constraints matrix
  * 20211102     RENARN       Input parameters HAZI and ZPDA have been added
- * 20220228     RENARN       ZTPS has been added
+ * 20220228     RENARN       ZTPS, WHLO has been added
  */
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 public class AddConstraint extends ExtendM3Transaction {
-  private final MIAPI mi;
-  private final LoggerAPI logger;
+  private final MIAPI mi
+  private final LoggerAPI logger
   private final ProgramAPI program
-  private final DatabaseAPI database;
-  private final SessionAPI session;
+  private final DatabaseAPI database
+  private final SessionAPI session
   private final TransactionAPI transaction
   private final MICallerAPI miCaller
   private final UtilityAPI utility
@@ -27,7 +27,7 @@ public class AddConstraint extends ExtendM3Transaction {
   private Integer ztps
 
   public AddConstraint(MIAPI mi, DatabaseAPI database, ProgramAPI program, MICallerAPI miCaller, UtilityAPI utility) {
-    this.mi = mi;
+    this.mi = mi
     this.database = database
     this.program = program
     this.miCaller = miCaller
@@ -662,7 +662,7 @@ public class AddConstraint extends ExtendM3Transaction {
       return
     }
   }
-
+  // Execute CRS165MI.RtvNextNumber
   private executeCRS165MIRtvNextNumber(String NBTY, String NBID){
     def parameters = ["NBTY": NBTY, "NBID": NBID]
     Closure<?> handler = { Map<String, String> response ->
